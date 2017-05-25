@@ -11,42 +11,54 @@ class PlayState extends FlxState
 	static public var GameAreaStart:FlxPoint = new FlxPoint(20,20);
 	static public var GameAreaEnd:FlxPoint = new FlxPoint(400,460);
 
-	private var _player:Player;
 	private var _HUD:HUD;
+	private var _CurrentLevel:Level;
+	private var _lastShotTime:Float;
 
 	override public function create():Void
 	{
-		_player = new Player(GameAreaEnd.x / 2, GameAreaEnd.y - 50);
-		add(_player);
-		add(_player._hitbox);
+		_lastShotTime = 0;
+		_CurrentLevel = new Level();
 		_HUD = new HUD(Std.int(GameAreaStart.x),
 			Std.int(GameAreaStart.y),
 			Std.int(GameAreaEnd.x - GameAreaStart.x),
 			Std.int(GameAreaEnd.y - GameAreaStart.y));
-		add(_HUD);
-		FlxG.camera.follow(_player,SCREEN_BY_SCREEN,1);
+		//FlxG.camera.follow(_player,SCREEN_BY_SCREEN,1);
 		super.create();
+	}
+
+	override public function draw():Void {
+		_CurrentLevel.draw();
+		_HUD.draw();
+		super.draw();
 	}
 
 	override public function update(elapsed:Float):Void
 	{
-		HandleInput();
+		HandleInput(elapsed);
+		_CurrentLevel.update(elapsed);
 		super.update(elapsed);
 	}
 
-	private function HandleInput():Void 
+	private function HandleInput(elapsed:Float):Void 
 	{
 		var _up:Bool = false;
 		var _down:Bool = false;
 		var _left:Bool = false;
 		var _right:Bool = false;
 		var _focus:Bool = false;
+		var _shoot:Bool = false;
+		var _bomb:Bool = false;
 
-		_up = keys.anyPressed([UP,W]);
-		_down = keys.anyPressed([DOWN,S]);
-		_left = keys.anyPressed([LEFT,A]);
-		_right = keys.anyPressed([RIGHT,D]);
+		var _player = this._CurrentLevel._player;
+
+		_up = keys.anyPressed([UP]);
+		_down = keys.anyPressed([DOWN]);
+		_left = keys.anyPressed([LEFT]);
+		_right = keys.anyPressed([RIGHT]);
 		_focus = keys.anyPressed([SHIFT]);
+		_shoot = keys.anyPressed([Z]);
+		_bomb = keys.anyPressed([X]);
 
 		if (_up && _down) 
 			_up = _down = false;
@@ -93,9 +105,16 @@ class PlayState extends FlxState
 			
 			_player.velocity.rotate(FlxPoint.weak(0,0), movementAngle);	
 		}
+
+		_lastShotTime = _lastShotTime + elapsed; 
+		if (_shoot && (_lastShotTime >= _player.reload_time)) {
+			_lastShotTime = 0;
+			_player.shoot();
+		}
 	}
 
 	static public function OutsidePlayArea(X:Float,Y:Float):Bool {
-		
+		return ((X < GameAreaStart.x) || (Y < GameAreaStart.y) ||
+			(X > GameAreaEnd.x) || (Y > GameAreaEnd.y));
 	}
 }

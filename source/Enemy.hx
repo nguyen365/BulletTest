@@ -11,10 +11,12 @@ class Enemy extends FlxSprite
 	private var _waypoints:Array<FlxPoint>;
 	private var _speed:Float = 100;
 
-	override public function create(?X:Float=0,?Y:Float=0):Void {
+	override public function new(?X:Float=0,?Y:Float=0):Void {
+		super(X,Y);
+
 		_waypoints = new Array<FlxPoint>();
 
-		super.create();
+		
 	}
 
 	override public function update(elapsed:Float):Void {

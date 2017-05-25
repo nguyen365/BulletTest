@@ -10,9 +10,9 @@ class Bullet extends FlxSprite
 
 	public var BulletType:String;
 
-	override public function create():Void {
+	override public function new():Void {
+		super();
 		BulletType = "None";
-		super.create();
 	}
 
 	public function SetBulletType(NewType:String):Void {
@@ -35,5 +35,13 @@ class Bullet extends FlxSprite
 
 	static private function BossBulletNormal(b:Bullet):Void {
 		b.loadGraphic(AssetPaths.MasterBall__png,true);
+	}
+
+	override public function update(elapsed:Float):Void {
+		if (PlayState.OutsidePlayArea(this.x,this.y)) {
+			this.kill();
+		}
+
+		super.update(elapsed);
 	}
 }

@@ -5,15 +5,19 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import flixel.FlxObject;
 import flixel.math.FlxPoint;
+import flixel.group.FlxGroup;
 
 class Player extends FlxSprite {
 	public var speed:Float = 100;
 	public var focus_speed:Float = 70;
+	public var reload_time:Float = 0.1;
 	public var is_moving:Bool;
 	public var focus:Bool;
 	public var _hitbox:HitBox;
+	public var _shots:FlxTypedGroup<Bullet>;
+	public var shot_speed:Float = 300;
 
-	public function new(?X:Float=0,?Y:Float=0) {
+	public function new(sPool:FlxTypedGroup<Bullet> ,?X:Float=0,?Y:Float=0) {
 		super(X,Y);
 		is_moving = false;
 		focus = false;
@@ -29,6 +33,9 @@ class Player extends FlxSprite {
 		animation.finishCallback = animationFinished;
 
 		_hitbox = new HitBox(getMidpoint().x,getMidpoint().y);
+
+		_shots = sPool;
+		_shots.forEach(MakeShotGraphic);
 	}
 
 	private function movement() {
@@ -76,6 +83,17 @@ class Player extends FlxSprite {
 		else if (name == "idle") {
 			
 		}
+	}
+
+	public function shoot():Void {
+		var shot = _shots.recycle(Bullet);
+		shot.setPosition(getMidpoint().x,getMidpoint().y);
+		shot.velocity.set(shot_speed,0);
+		shot.velocity.rotate(FlxPoint.weak(0,0), 270);
+	}
+
+	static private function MakeShotGraphic(s:Bullet):Void {
+		s.loadGraphic(AssetPaths.YoumuProjectile__png,false);
 	}
 }
 
